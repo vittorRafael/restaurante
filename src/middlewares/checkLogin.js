@@ -7,18 +7,20 @@ const checkLogin = async (req, res, next) => {
     const { authorization } = req.headers;
 
     if (!authorization) {
-        return res.status(401).json('Para acessar este recurso um token de autenticação válido deve ser enviado.');
+        return res.status(401).json({mensagem: 'Para acessar este recurso um token de autenticação válido deve ser enviado.'});
     }
 
     try {
         const token = authorization.replace('Bearer ', '').trim();
 
         const { id } = jwt.verify(token, passHash);
-
-        const existUser = await knex('usuarios').where('id', id);
+        const existUser = await knex('usuarios').innerJoin('cargos', function() {
+            this
+              .on('cargos.id', '=', 'usuarios.cargo_id')
+          }).where('usuarios.id', id).select('usuarios.*', 'cargos.funcao')
 
         if (existUser.length === 0) {
-            return res.status(401).json('Para acessar este recurso um token de autenticação válido deve ser enviado.');
+            return res.status(401).json({mensagem: 'Para acessar este recurso um token de autenticação válido deve ser enviado.'});
         }
 
         const { senha: _, ...user } = existUser[0];
