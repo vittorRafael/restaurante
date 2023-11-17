@@ -1,7 +1,9 @@
 const express = require('express')
-const userController = require('../controllers/userController')
 const router = express.Router()
+const userRouter = require('./userRoutes')
+const roleRouter = require('./roleRoutes')
 
-router.post('/usuarios', userController.newUser)
+router.use(userRouter)
+router.use(roleRouter)
 
 module.exports = router
